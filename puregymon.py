@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import re
 import sys
@@ -11,7 +11,7 @@ PUREGYM_LOGIN = "https://www.puregym.com/login/"
 PUREGYM_LOGIN_API = "https://www.puregym.com/api/members/login"
 PUREGYM_MEMBERS = "https://www.puregym.com/members/"
 
-FILE_MEMBERS = "members.csv"
+FILE_MEMBERS = "headcount.csv"
 FILE_CREDENTIALS = ".puregym_credentials"
 
 def get_session(url):
@@ -32,9 +32,6 @@ def login(url, cookies, token, username, pin):
         }
     r = requests.post(url, headers=headers, cookies=cookies, json=data)
 
-    with open("temp_login.html", "w") as f:
-        f.write(r.text)
-
     return r.cookies
 
 def count_members(url, cookies):
@@ -48,7 +45,7 @@ def count_members(url, cookies):
     if m:
         count = int(m.group())
         if re.match(r"Fewer than \d+ people", t):
-            print "Gym reports members at lower bound of %d" % count
+            print "Gym reports members at lower bound of %d." % count
         return count
     else:
         return -1
@@ -67,18 +64,18 @@ if __name__ == "__main__":
             l = f.readline().strip().split(" ")
             username = l[0]
             pin = l[1]
-            print "Using credentials {%s, %s}" % (username, pin)
+            print "Using credentials {%s, %s}." % (username, pin)
     except Exception as x:
-        print "Failed to read credentials file"
+        print "Failed to read credentials file!"
         quit()
 
     session, token = get_session(PUREGYM_LOGIN)
-    #print "Session: %s" % session
-    #print "Token: %s" % token
 
     loggedin_session = login(PUREGYM_LOGIN_API, session, token, username, pin)
-    #print "Logged in session: %s" % loggedin_session
 
     members = count_members(PUREGYM_MEMBERS, loggedin_session)
     if members is not -1:
         record_members(FILE_MEMBERS, members)
+        print "Current headcount: %s" % members
+    else:
+        print "Could not get current headcount."

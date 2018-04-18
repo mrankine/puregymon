@@ -11,6 +11,6 @@ Set up a cron job to run the script periodically e.g.:
 */10 * * * * /path/to/puregymon.py
 ```
 
-Headcounts are recorded in a Comma-Separated Values file (`members.csv`) in the same directory.
+Headcounts are recorded in a Comma-Separated Values file (`headcount.csv`) in the same directory.
 
 Note that when headcount drops below a certain value (currently 20), PureGym reports "fewer than 20 people" rather than the precise number. In this case, 20 will be recorded.
