@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+import csv
 import os
 import re
 import sys
-from datetime import datetime
+from datetime import date, time, datetime
 
 import requests
 from bs4 import BeautifulSoup
@@ -10,9 +11,11 @@ from bs4 import BeautifulSoup
 PUREGYM_LOGIN = "https://www.puregym.com/login/"
 PUREGYM_LOGIN_API = "https://www.puregym.com/api/members/login"
 PUREGYM_MEMBERS = "https://www.puregym.com/members/"
+PUREGYM_ACTIVITY = "https://www.puregym.com/members/activity/"
 
-FILE_MEMBERS = "headcount.csv"
 FILE_CREDENTIALS = ".puregym_credentials"
+FILE_HEADCOUNT = "headcount.csv"
+FILE_ACTIVITY = "activity.csv"
 
 def get_session(url):
     r = requests.get(url)
@@ -50,9 +53,60 @@ def count_members(url, cookies):
     else:
         return -1
     
-def record_members(members_log, members):
-    with open(os.path.join(__location__, members_log), "a") as f:
-        f.write("%s,%s\n" % (datetime.now().strftime(r"%Y/%m/%d %H:%M:%S"), members))
+def record_members(filename, members):
+    with open(os.path.join(__location__, filename), "a") as f:
+        f.write("{ts},{c}\n".format(ts=datetime.now().strftime(r"%Y/%m/%d %H:%M:%S"), c=members))
+
+def get_activity(url, cookies):
+    activity = []
+
+    # Maps logical keys to css classnames in PureGym html
+    cols = {
+        "date": "calendar-card__date",
+        "entry_time": "calendar-card__entry-time",
+        "gym": "calendar-card__gym",
+        "class": "calendar-card__class",
+        "duration": "calendar-card__duration",
+    }
+
+    r = requests.get(url, cookies=cookies)
+
+    soup = BeautifulSoup(r.text, "html.parser")
+    rows = soup.find_all("div", class_="calendar-card calendar-card--static")
+    if rows is None:
+        return None
+    for r in rows:
+        record = {}
+        for col_label, col_selector  in cols.items():
+            cell = r.find("div", class_=col_selector)
+            if cell is None:
+                continue
+            t = cell.text.strip()
+            record[col_label] = t
+
+        activity.append({
+            "datetime": str(
+                datetime.combine(
+                    datetime.strptime(record["date"], r"%d/%m/%Y"),
+                    datetime.strptime(record["entry_time"], r"%H:%M").timetz()
+                )),
+            "gym": record["gym"],
+            "class": record["class"],
+            "duration": record["duration"].replace(" minutes", "")
+        })
+
+    activity.reverse()
+    return activity
+
+def save_activity(filename, activity):
+    with open(os.path.join(__location__, filename), "a+") as f:
+        f.seek(0)
+        existing = list(f)
+        for record in activity:
+            pickled_record = ",".join((record["datetime"], record["gym"], record["class"], record["duration"])) + "\n"
+            if pickled_record not in existing:
+                print("Saving new activity: {r}".format(r=record))
+                f.write(pickled_record)
 
 __location__ = os.path.dirname(os.path.abspath(__file__))
 
@@ -64,7 +118,7 @@ if __name__ == "__main__":
             l = f.readline().strip().split(" ")
             username = l[0]
             pin = l[1]
-            print("Using credentials {u}, {p}.".format(u=username, p=pin))
+            print("Using credentials {username}, {pin}.".format(username=username, pin=pin))
     except Exception as x:
         print("Failed to read credentials file!")
         quit()
@@ -75,7 +129,10 @@ if __name__ == "__main__":
 
     members = count_members(PUREGYM_MEMBERS, loggedin_session)
     if members is not -1:
-        record_members(FILE_MEMBERS, members)
-        print("Current headcount: {count}".format(count=members))
+        record_members(FILE_HEADCOUNT, members)
+        print("Current headcount: {count}.".format(count=members))
     else:
         print("Could not get current headcount.")
+
+    activity = get_activity(PUREGYM_ACTIVITY, loggedin_session)
+    save_activity(FILE_ACTIVITY, activity)
