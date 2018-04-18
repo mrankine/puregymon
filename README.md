@@ -1,7 +1,7 @@
 # Readme
 This python script logs in to your PureGym account and records how many people are currently in your home gym.
 
-**Requirements:** requests, BeautifulSoup
+**Requirements:** requests, BeautifulSoup4, python3.
 
 Create a file called `.puregym_credentials` and save it in the same directory as the script. The contents should be your PureGym account and PIN in the format `[username] [PIN]` (e.g. `foo@bar.com 12345678`).
 

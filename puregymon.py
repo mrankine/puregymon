@@ -45,7 +45,7 @@ def count_members(url, cookies):
     if m:
         count = int(m.group())
         if re.match(r"Fewer than \d+ people", t):
-            print "Gym reports members at lower bound of %d." % count
+            print("Gym reports members at lower bound of {count}.".format(count=count))
         return count
     else:
         return -1
@@ -64,9 +64,9 @@ if __name__ == "__main__":
             l = f.readline().strip().split(" ")
             username = l[0]
             pin = l[1]
-            print "Using credentials {%s, %s}." % (username, pin)
+            print("Using credentials {u}, {p}.".format(u=username, p=pin))
     except Exception as x:
-        print "Failed to read credentials file!"
+        print("Failed to read credentials file!")
         quit()
 
     session, token = get_session(PUREGYM_LOGIN)
@@ -76,6 +76,6 @@ if __name__ == "__main__":
     members = count_members(PUREGYM_MEMBERS, loggedin_session)
     if members is not -1:
         record_members(FILE_MEMBERS, members)
-        print "Current headcount: %s" % members
+        print("Current headcount: {count}".format(count=members))
     else:
-        print "Could not get current headcount."
+        print("Could not get current headcount.")
