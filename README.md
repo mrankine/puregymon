@@ -12,3 +12,5 @@ Set up a cron job to run the script periodically e.g.:
 ```
 
 Headcounts are recorded in a Comma-Separated Values file (`members.csv`) in the same directory.
+
+Note that when headcount drops below a certain value (currently 20), PureGym reports "fewer than X people" rather than the precise number. In this case, the script will record 20.
