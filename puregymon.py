@@ -44,10 +44,10 @@ def count_members(url, cookies):
     span = soup.find("span", class_="heading heading--level3 secondary-color margin-none")
     t = span.text
 
-    m = re.match(r"\d+", t)
+    m = re.search(r"\d+", t)
     if m:
         count = int(m.group())
-        if re.match(r"Fewer than \d+ people", t):
+        if re.search(r"Fewer than \d+ people", t):
             print("Gym reports members at lower bound of {count}.".format(count=count))
         return count
     else:
