@@ -2,3 +2,4 @@
 puregymon.code-workspace
 .vscode/
 *.csv
+*.log
