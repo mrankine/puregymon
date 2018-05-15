@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 PUREGYM_LOGIN = "https://www.puregym.com/login/"
 PUREGYM_LOGIN_API = "https://www.puregym.com/api/members/login"
 PUREGYM_MEMBERS = "https://www.puregym.com/members/"
-PUREGYM_ACTIVITY = "https://www.puregym.com/members/activity/"
+PUREGYM_ACTIVITY = "https://www.puregym.com/members/activity/?view=year"
 
 FILE_CREDENTIALS = ".puregym_credentials"
 FILE_HEADCOUNT = "headcount.csv"
