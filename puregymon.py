@@ -13,7 +13,8 @@ PUREGYM_LOGIN_API = "https://www.puregym.com/api/members/login"
 PUREGYM_MEMBERS = "https://www.puregym.com/members/"
 PUREGYM_ACTIVITY = "https://www.puregym.com/members/activity/?view=year"
 
-FILE_CREDENTIALS = ".puregym_credentials"
+CONFIGFILE_CREDENTIALS = ".puregym_credentials"
+CONFIGFILE_OUTPUTDIR = ".puregym_outputdir"
 FILE_HEADCOUNT = "headcount.csv"
 FILE_ACTIVITY = "activity.csv"
 
@@ -114,7 +115,7 @@ if __name__ == "__main__":
     username = None
     pin = None
     try:
-        with open(os.path.join(__location__, FILE_CREDENTIALS)) as f:
+        with open(os.path.join(__location__, CONFIGFILE_CREDENTIALS)) as f:
             l = f.readline().strip().split(" ")
             username = l[0]
             pin = l[1]
@@ -122,6 +123,15 @@ if __name__ == "__main__":
     except Exception as x:
         print("Failed to read credentials file!")
         quit()
+
+    try:
+        with open(os.path.join(__location__, CONFIGFILE_OUTPUTDIR)) as f:
+            o = f.readline().strip()
+            FILE_HEADCOUNT = os.path.join(o, FILE_HEADCOUNT)
+            FILE_ACTIVITY = os.path.join(o, FILE_ACTIVITY)
+            print("Using output directory: {o}".format(o=o))
+    except Exception as x:
+        print("Failed to read output directory from config file - assuming current working directory")
 
     session, token = get_session(PUREGYM_LOGIN)
 

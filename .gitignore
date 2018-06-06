@@ -1,4 +1,5 @@
 .puregym_credentials
+.puregym_outputdir
 puregymon.code-workspace
 .vscode/
 *.csv
